@@ -1,4 +1,4 @@
-package gov.ismonnet.cardhelp.games;
+package gov.ismonnet.cardhelp.core;
 
 import java.util.Collection;
 

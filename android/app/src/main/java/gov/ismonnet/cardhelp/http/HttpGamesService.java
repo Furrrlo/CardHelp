@@ -1,19 +1,20 @@
-package gov.ismonnet.cardhelp.games;
+package gov.ismonnet.cardhelp.http;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Collections;
 
-import gov.ismonnet.cardhelp.Card;
-import gov.ismonnet.cardhelp.score.ScoreService;
-import gov.ismonnet.cardhelp.serializer.GamesDeserializer;
+import javax.inject.Inject;
 
-public class HttpGamesService implements GamesService {
+import gov.ismonnet.cardhelp.core.GamesDeserializer;
+import gov.ismonnet.cardhelp.core.GamesService;
+
+class HttpGamesService implements GamesService {
 
     private final GamesDeserializer gamesDeserializer;
 
-    public HttpGamesService(GamesDeserializer gamesDeserializer) {
+    @Inject HttpGamesService(GamesDeserializer gamesDeserializer) {
         this.gamesDeserializer = gamesDeserializer;
     }
 

@@ -1,13 +1,16 @@
 package gov.ismonnet.cardhelp.serializer;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.Collection;
 
-import gov.ismonnet.cardhelp.Card;
+import javax.inject.Inject;
 
-public class JsonCardsSerializer implements CardsSerializer {
+import gov.ismonnet.cardhelp.Card;
+import gov.ismonnet.cardhelp.core.CardsSerializer;
+
+class JsonCardsSerializer implements CardsSerializer {
+
+    @Inject JsonCardsSerializer() {}
+
     @Override
     public String serialize(String game, Collection<Card> cards) {
 

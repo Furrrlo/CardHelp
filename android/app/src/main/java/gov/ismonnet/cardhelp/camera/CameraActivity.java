@@ -1,36 +1,36 @@
-package gov.ismonnet.cardhelp;
-
-import androidx.appcompat.app.AppCompatActivity;
+package gov.ismonnet.cardhelp.camera;
 
 import android.media.Image;
 import android.os.Bundle;
 
+import org.opencv.android.BaseLoaderCallback;
+
 import java.util.Collection;
 
-import gov.ismonnet.cardhelp.detection.CardsDetector;
-import gov.ismonnet.cardhelp.detection.OpenCvCardsDetector;
-import gov.ismonnet.cardhelp.games.GamesService;
-import gov.ismonnet.cardhelp.games.HttpGamesService;
-import gov.ismonnet.cardhelp.score.HttpScoreService;
-import gov.ismonnet.cardhelp.score.ScoreService;
-import gov.ismonnet.cardhelp.serializer.JsonCardsSerializer;
-import gov.ismonnet.cardhelp.serializer.JsonGamesDeserializer;
+import javax.inject.Inject;
 
-public class MainActivity extends AppCompatActivity {
+import androidx.appcompat.app.AppCompatActivity;
+import dagger.android.AndroidInjection;
+import gov.ismonnet.cardhelp.Card;
+import gov.ismonnet.cardhelp.R;
+import gov.ismonnet.cardhelp.core.CardsDetector;
+import gov.ismonnet.cardhelp.core.GamesService;
+import gov.ismonnet.cardhelp.core.ScoreService;
 
-    private CardsDetector cardsDetector;
-    private GamesService gamesService;
-    private ScoreService scoreService;
+public class CameraActivity extends AppCompatActivity {
+
+    @Inject CardsDetector cardsDetector;
+    @Inject GamesService gamesService;
+    @Inject ScoreService scoreService;
+
+    private BaseLoaderCallback openCvLoaderCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
-        cardsDetector = new OpenCvCardsDetector();
-        gamesService = new HttpGamesService(new JsonGamesDeserializer());
-        scoreService = new HttpScoreService(new JsonCardsSerializer());
     }
 
     @Override

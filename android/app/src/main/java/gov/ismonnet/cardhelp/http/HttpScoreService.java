@@ -1,20 +1,20 @@
-package gov.ismonnet.cardhelp.score;
+package gov.ismonnet.cardhelp.http;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 
-import gov.ismonnet.cardhelp.Card;
-import gov.ismonnet.cardhelp.serializer.CardsSerializer;
+import javax.inject.Inject;
 
-public class HttpScoreService implements ScoreService {
+import gov.ismonnet.cardhelp.Card;
+import gov.ismonnet.cardhelp.core.CardsSerializer;
+import gov.ismonnet.cardhelp.core.ScoreService;
+
+class HttpScoreService implements ScoreService {
 
     private final CardsSerializer cardsSerializer;
 
-    public HttpScoreService(CardsSerializer cardsSerializer) {
+    @Inject HttpScoreService(CardsSerializer cardsSerializer) {
         this.cardsSerializer = cardsSerializer;
     }
 

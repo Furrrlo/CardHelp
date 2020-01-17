@@ -1,4 +1,4 @@
-package gov.ismonnet.cardhelp.serializer;
+package gov.ismonnet.cardhelp.core;
 
 import java.util.Collection;
 

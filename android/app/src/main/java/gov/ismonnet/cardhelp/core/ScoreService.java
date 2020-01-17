@@ -1,7 +1,5 @@
-package gov.ismonnet.cardhelp.score;
+package gov.ismonnet.cardhelp.core;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Collection;
 
 import gov.ismonnet.cardhelp.Card;

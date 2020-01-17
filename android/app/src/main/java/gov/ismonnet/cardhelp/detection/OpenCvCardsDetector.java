@@ -4,9 +4,14 @@ import android.media.Image;
 
 import java.util.Collection;
 
-import gov.ismonnet.cardhelp.Card;
+import javax.inject.Inject;
 
-public class OpenCvCardsDetector implements CardsDetector {
+import gov.ismonnet.cardhelp.Card;
+import gov.ismonnet.cardhelp.core.CardsDetector;
+
+class OpenCvCardsDetector implements CardsDetector {
+
+    @Inject OpenCvCardsDetector() {}
 
     @Override
     public Collection<Card> detectCards(Image image) {

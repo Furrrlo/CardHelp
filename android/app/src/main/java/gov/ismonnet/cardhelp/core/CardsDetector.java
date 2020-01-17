@@ -1,4 +1,4 @@
-package gov.ismonnet.cardhelp.detection;
+package gov.ismonnet.cardhelp.core;
 
 import android.media.Image;
 
