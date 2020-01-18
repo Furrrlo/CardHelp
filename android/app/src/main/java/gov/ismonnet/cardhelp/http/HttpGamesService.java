@@ -37,10 +37,8 @@ class HttpGamesService implements GamesService {
             while ((line = rd.readLine()) != null){
                 jsonString += line;
             }
-            rd.close();
 
-            if(false)
-                throw new IOException("temp");
+            rd.close();
 
             return gamesDeserializer.deserialize(jsonString);
         } catch (IOException ex) {

@@ -25,13 +25,10 @@ class JsonGamesDeserializer implements GamesDeserializer {
 
             for(int i = 0;i < size; ++i)
                 res.add(jArray.get(i).toString());
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        res.forEach(r->{
-            System.out.println(r);
-        });
 
         return res;
     }

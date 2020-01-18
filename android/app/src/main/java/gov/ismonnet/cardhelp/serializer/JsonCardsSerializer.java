@@ -1,5 +1,9 @@
 package gov.ismonnet.cardhelp.serializer;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -13,6 +17,8 @@ class JsonCardsSerializer implements CardsSerializer {
 
     @Override
     public String serialize(String game, Collection<Card> cards) {
+
+
 
         /*
         org.json.JSONObject
