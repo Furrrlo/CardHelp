@@ -30,7 +30,7 @@ class HttpScoreService implements ScoreService {
 
         try {
             // HttpURLConnection post
-            URL url = new URL("http://localhost/Tommaso/php/score.php");
+            URL url = new URL("http://cardhelp.altervista.org/score.php");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
             connection.setDoOutput(true);

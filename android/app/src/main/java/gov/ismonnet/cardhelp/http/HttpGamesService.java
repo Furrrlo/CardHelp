@@ -27,7 +27,7 @@ class HttpGamesService implements GamesService {
         String jsonString = "";
 
         try{
-            URL url = new URL("http://localhost/Tommaso/php/games.php");
+            URL url = new URL("http://cardhelp.altervista.org/games.php");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
