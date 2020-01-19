@@ -3,8 +3,8 @@ package gov.ismonnet.cardhelp.serializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Vector;
 
 import javax.inject.Inject;
 
@@ -16,7 +16,7 @@ class JsonGamesDeserializer implements GamesDeserializer {
 
     @Override
     public Collection<String> deserialize(String toDeserialize) {
-        Collection<String> res = new Vector<>();
+        Collection<String> res = new ArrayList<>();
 
         try {
             JSONArray jArray = new JSONArray(toDeserialize);
