@@ -5,7 +5,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collection;
-import java.util.Vector;
 
 import javax.inject.Inject;
 
@@ -18,14 +17,6 @@ class JsonCardsSerializer implements CardsSerializer {
 
     @Override
     public String serialize(String game, Collection<Card> cards) {
-        //TODO: When the application can detect cards, remove initialization
-        cards = new Vector<>();
-
-        cards.add(new Card(Card.Suit.CLUB,4));
-        cards.add(new Card(Card.Suit.HEART,3));
-        cards.add(new Card(Card.Suit.DIAMOND,12));
-        cards.add(new Card(Card.Suit.SPADE,5));
-
         JSONObject jRes = new JSONObject();
         JSONObject jTemp = new JSONObject();
 
@@ -39,7 +30,7 @@ class JsonCardsSerializer implements CardsSerializer {
                 try {
                     //create new card object
                     jTemp.put("number", card.getNumber());
-                    jTemp.put("suit", card.getSuit().toString());
+                    jTemp.put("suit", card.getSuit().name().toLowerCase());
 
                     //put card to array
                     jCards.put(new JSONObject(jTemp.toString()));
