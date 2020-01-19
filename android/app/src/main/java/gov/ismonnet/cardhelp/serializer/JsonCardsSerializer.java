@@ -57,7 +57,7 @@ class JsonCardsSerializer implements CardsSerializer {
             jRes.put("cards", jCards);
 
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return jRes.toString();

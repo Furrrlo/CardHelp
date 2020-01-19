@@ -26,7 +26,7 @@ class JsonGamesDeserializer implements GamesDeserializer {
                 res.add(jArray.get(i).toString());
 
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return res;
