@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">android</string>
+    <string name="app_name">CardHelp</string>
+    <string name="title_activity_main">Main Activity</string>
+    <string name="edited_image_content">edited_image</string>
 </resources>

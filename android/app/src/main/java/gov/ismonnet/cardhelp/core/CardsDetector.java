@@ -1,6 +1,6 @@
 package gov.ismonnet.cardhelp.core;
 
-import android.media.Image;
+import android.graphics.Bitmap;
 
 import java.util.Collection;
 
@@ -8,5 +8,5 @@ import gov.ismonnet.cardhelp.Card;
 
 public interface CardsDetector {
 
-    Collection<Card> detectCards(Image image);
+    Collection<Card> detectCards(Bitmap image);
 }

@@ -1,7 +1,11 @@
 package gov.ismonnet.cardhelp.detection;
 
-import android.media.Image;
+import android.graphics.Bitmap;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -14,7 +18,13 @@ class OpenCvCardsDetector implements CardsDetector {
     @Inject OpenCvCardsDetector() {}
 
     @Override
-    public Collection<Card> detectCards(Image image) {
-        return null;
+    public Collection<Card> detectCards(Bitmap image) {
+
+        final Collection<Card> cards = new ArrayList<>();
+
+        final Mat input = new Mat();
+        Utils.bitmapToMat(image, input);
+
+        return cards;
     }
 }

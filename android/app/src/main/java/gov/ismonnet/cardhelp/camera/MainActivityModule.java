@@ -6,8 +6,8 @@ import gov.ismonnet.cardhelp.detection.OpenCvModule;
 import gov.ismonnet.cardhelp.http.HttpModule;
 
 @Module(includes = { OpenCvModule.class, HttpModule.class })
-public abstract class CameraActivityModule {
+public abstract class MainActivityModule {
 
     @ContributesAndroidInjector
-    abstract CameraActivity contributeCameraActivity();
+    abstract MainActivity contributeCameraActivity();
 }
