@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -37,24 +38,23 @@ class HttpScoreService implements ScoreService {
             connection.setRequestMethod("POST");
 
             OutputStream out = connection.getOutputStream();
-            out.write(serialized.getBytes("UTF-8"));
+            out.write(serialized.getBytes(StandardCharsets.UTF_8));
             out.close();
 
+            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();
 
-            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line;
-
-            while ((line = rd.readLine()) != null){
+            while ((line = rd.readLine()) != null)
                 response.append(line);
-            }
             rd.close();
 
-            try{
+            try {
                 return Integer.parseInt(response.toString());
-            }catch(NumberFormatException e){
+            } catch(NumberFormatException e) {
                 return -1;
             }
+
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
         }

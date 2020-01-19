@@ -38,8 +38,8 @@ class JsonCardsSerializer implements CardsSerializer {
             cards.forEach(card -> {
                 try {
                     //create new card object
-                    jTemp.put("number",card.getNumber());
-                    jTemp.put("suit",card.getSuit().toString());
+                    jTemp.put("number", card.getNumber());
+                    jTemp.put("suit", card.getSuit().toString());
 
                     //put card to array
                     jCards.put(new JSONObject(jTemp.toString()));
@@ -54,7 +54,7 @@ class JsonCardsSerializer implements CardsSerializer {
             } );
 
             //put vector into result
-            jRes.put("cards",jCards);
+            jRes.put("cards", jCards);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -63,55 +63,3 @@ class JsonCardsSerializer implements CardsSerializer {
         return jRes.toString();
     }
 }
-
-        /*
-        org.json.JSONObject
-        org.json.JSONArray
-        '{
-            "game": "scala",
-            "cards": [
-                {
-                    "suit": "picche",
-                    "number": 1
-                },
-                {
-                    "suit": "fiori",
-                    "number": 2
-                },
-                {
-                    "suit": "cuori",
-                    "number": 3
-                },
-                {
-                    "suit": "quadri",
-                    "number": 3
-                },
-                {
-                    "suit": "fiori",
-                    "number": 4
-                },
-                {
-                    "suit": "quadri",
-                    "number": 7
-                },
-                {
-                    "suit": "picche",
-                    "number": 10
-                },
-                {
-                    "suit": "cuori",
-                    "number": 12
-                },
-                {
-                    "suit": "fiori",
-                    "number": 12
-                },
-                {
-                    "suit": "quadri",
-                    "number": 13
-                }
-            ]
-        }'
-        */
-
-

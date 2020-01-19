@@ -7,7 +7,6 @@ import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -24,23 +23,21 @@ class HttpGamesService implements GamesService {
 
     @Override
     public Collection<String> listGames() {
-        String jsonString = "";
-
-        try{
+        try {
             URL url = new URL("http://cardhelp.altervista.org/games.php");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
             BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line = "";
+            StringBuilder jsonString = new StringBuilder();
 
-            while ((line = rd.readLine()) != null){
-                jsonString += line;
-            }
-
+            String line;
+            while ((line = rd.readLine()) != null)
+                jsonString.append(line);
             rd.close();
 
-            return gamesDeserializer.deserialize(jsonString);
+            return gamesDeserializer.deserialize(jsonString.toString());
+
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
         }
