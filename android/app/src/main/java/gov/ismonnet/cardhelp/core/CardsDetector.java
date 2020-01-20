@@ -8,5 +8,5 @@ import gov.ismonnet.cardhelp.Card;
 
 public interface CardsDetector {
 
-    Collection<Card> detectCards(Bitmap image);
+    Bitmap detectCards(Bitmap input, Collection<Card> cards);
 }

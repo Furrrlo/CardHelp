@@ -1,4 +1,4 @@
-package gov.ismonnet.cardhelp.camera;
+package gov.ismonnet.cardhelp.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,22 +8,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ViewFlipper;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CountDownLatch;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -38,8 +35,6 @@ import gov.ismonnet.cardhelp.core.CardsDetector;
 import gov.ismonnet.cardhelp.core.GamesService;
 import gov.ismonnet.cardhelp.core.ScoreService;
 
-import static android.content.ContentValues.TAG;
-
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -47,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String CURR_PHOTO_FILE_KEY = "CURR_PHOTO";
     private static final String SELECTED_GAME_KEY = "SELECTED_GAME";
     private static final String SCORE_KEY = "SCORE";
+
+    @Inject Set<ActivityLifeCycle> lifecycleListeners;
 
     @Inject CardsDetector cardsDetector;
     @Inject GamesService gamesService;
@@ -66,36 +63,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         viewFlipper = findViewById(R.id.viewFlipper);
 
-        // TODO: move this out of the activity
-        //       as it does not belong here
-        // Init OpenCv
-
-        final CountDownLatch latch = new CountDownLatch(1);
-        final BaseLoaderCallback openCvLoaderCallback = new BaseLoaderCallback(this) {
-            @Override
-            public void onManagerConnected(int status) {
-                if (status == BaseLoaderCallback.SUCCESS) {
-                    latch.countDown();
-                    return;
-                }
-                super.onManagerConnected(status);
-            }
-        };
-
-        if(!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Couldn't find internal OpenCV library. Attempting to load it using OpenCV Engine service.");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_4_0,
-                    this,
-                    openCvLoaderCallback);
-        } else {
-            openCvLoaderCallback.onManagerConnected(BaseLoaderCallback.SUCCESS);
-        }
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println(lifecycleListeners);
+        lifecycleListeners.forEach(ActivityLifeCycle::onCreate);
 
         // Actual init
 
@@ -103,10 +72,15 @@ public class MainActivity extends AppCompatActivity {
         selectedGame = null;
         score = -1;
 
-        if(savedInstanceState != null) {
-            currPhotoUri = Uri.parse(savedInstanceState.getString(CURR_PHOTO_FILE_KEY));
-            selectedGame = savedInstanceState.getString(SELECTED_GAME_KEY);
-            score = savedInstanceState.getInt(SCORE_KEY);
+//        if(savedInstanceState != null) {
+//            currPhotoUri = Uri.parse(savedInstanceState.getString(CURR_PHOTO_FILE_KEY));
+//            selectedGame = savedInstanceState.getString(SELECTED_GAME_KEY);
+//            score = savedInstanceState.getInt(SCORE_KEY);
+        currPhotoUri = FileProvider.getUriForFile(this,
+                BuildConfig.APPLICATION_ID + ".fileprovider",
+                new File(
+                        getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                        "curr.jpg"));
 
             try {
                 parsePicture(currPhotoUri);
@@ -115,13 +89,14 @@ public class MainActivity extends AppCompatActivity {
                     askGameInput();
 
             } catch (UncheckedIOException ex) {
-                currPhotoUri = null;
-                takePicture();
+//                currPhotoUri = null;
+//                takePicture();
+                throw ex;
             }
 
-        } else {
-            takePicture();
-        }
+//        } else {
+//            takePicture();
+//        }
     }
 
     @Override
@@ -173,14 +148,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void parsePicture(Uri photoUri) {
-        final Bitmap photo = loadBitmap(photoUri);
+        final Bitmap photo = processPicture(loadBitmap(photoUri));
         // TODO: not really needed now but I wanted in the future
         //       to be able to look at all the processing steps
         final ImageView imageView = (ImageView) View.inflate(this, R.layout.image_view, null);
         imageView.setImageBitmap(photo);
         viewFlipper.addView(imageView);
-
-        processPicture(photo);
     }
 
     private void askGameInput() {
@@ -189,6 +162,46 @@ public class MainActivity extends AppCompatActivity {
 //        score = scoreService.calculatePoints(selectedGame, cards);
 //        // TODO: show result
     }
+
+    // Lifecycle
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        lifecycleListeners.forEach(ActivityLifeCycle::onStart);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        lifecycleListeners.forEach(ActivityLifeCycle::onResume);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        lifecycleListeners.forEach(ActivityLifeCycle::onPause);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        lifecycleListeners.forEach(ActivityLifeCycle::onStop);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        lifecycleListeners.forEach(ActivityLifeCycle::onRestart);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        lifecycleListeners.forEach(ActivityLifeCycle::onDestroy);
+    }
+
+    // Utilities
 
     private Bitmap loadBitmap(Uri photoUri) {
         try {
@@ -246,9 +259,11 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void processPicture(Bitmap photo) {
-        final Collection<Card> cards = cardsDetector.detectCards(photo);
-        System.out.println(cards);
+    private Bitmap processPicture(Bitmap photo) {
+        final List<Card> cards = new ArrayList<>();
+        final Bitmap out = cardsDetector.detectCards(photo, cards);
+
+        return out;
     }
 
 }
