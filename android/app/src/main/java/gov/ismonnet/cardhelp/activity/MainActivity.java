@@ -72,15 +72,15 @@ public class MainActivity extends AppCompatActivity {
         selectedGame = null;
         score = -1;
 
-//        if(savedInstanceState != null) {
-//            currPhotoUri = Uri.parse(savedInstanceState.getString(CURR_PHOTO_FILE_KEY));
-//            selectedGame = savedInstanceState.getString(SELECTED_GAME_KEY);
-//            score = savedInstanceState.getInt(SCORE_KEY);
-        currPhotoUri = FileProvider.getUriForFile(this,
-                BuildConfig.APPLICATION_ID + ".fileprovider",
-                new File(
-                        getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                        "curr.jpg"));
+        if(savedInstanceState != null) {
+            currPhotoUri = Uri.parse(savedInstanceState.getString(CURR_PHOTO_FILE_KEY));
+            selectedGame = savedInstanceState.getString(SELECTED_GAME_KEY);
+            score = savedInstanceState.getInt(SCORE_KEY);
+//            currPhotoUri = FileProvider.getUriForFile(this,
+//                    BuildConfig.APPLICATION_ID + ".fileprovider",
+//                    new File(
+//                            getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+//                            "curr.jpg"));
 
             try {
                 parsePicture(currPhotoUri);
@@ -89,14 +89,14 @@ public class MainActivity extends AppCompatActivity {
                     askGameInput();
 
             } catch (UncheckedIOException ex) {
-//                currPhotoUri = null;
-//                takePicture();
+                currPhotoUri = null;
+                takePicture();
                 throw ex;
             }
 
-//        } else {
-//            takePicture();
-//        }
+        } else {
+            takePicture();
+        }
     }
 
     @Override
