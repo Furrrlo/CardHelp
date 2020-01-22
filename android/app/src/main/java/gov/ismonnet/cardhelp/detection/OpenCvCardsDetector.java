@@ -77,7 +77,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
     private final Context context;
     private final OpenCvLoader loader;
 
-    private Map<Card.Suit, ReferenceSuit> referenceSuits;
+    private Map<ReferenceSuit, Card.Suit> referenceSuits;
 
     @Inject OpenCvCardsDetector(Context context, OpenCvLoader loader) {
         this.context = context;
@@ -90,15 +90,17 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
         loader.onCreate();
 
         try {
-            final Map<Card.Suit, Mat> temp0 = new ArrayMap<>();
-            temp0.put(Card.Suit.HEART, Utils.loadResource(context, R.drawable.hearts, IMREAD_GRAYSCALE));
-            temp0.put(Card.Suit.CLUB, Utils.loadResource(context, R.drawable.clubs, IMREAD_GRAYSCALE));
-            temp0.put(Card.Suit.SPADE, Utils.loadResource(context, R.drawable.spades, IMREAD_GRAYSCALE));
-            temp0.put(Card.Suit.DIAMOND, Utils.loadResource(context, R.drawable.diamonds, IMREAD_GRAYSCALE));
+            final Map<Mat, Card.Suit> temp0 = new ArrayMap<>();
+            temp0.put(Utils.loadResource(context, R.drawable.hearts, IMREAD_GRAYSCALE), Card.Suit.HEART);
+            temp0.put(Utils.loadResource(context, R.drawable.obese_clubs, IMREAD_GRAYSCALE), Card.Suit.CLUB);
+            temp0.put(Utils.loadResource(context, R.drawable.retarded_club, IMREAD_GRAYSCALE), Card.Suit.CLUB);
+            temp0.put(Utils.loadResource(context, R.drawable.obese_spades, IMREAD_GRAYSCALE), Card.Suit.SPADE);
+            temp0.put(Utils.loadResource(context, R.drawable.retarded_spades, IMREAD_GRAYSCALE), Card.Suit.SPADE);
+            temp0.put(Utils.loadResource(context, R.drawable.diamonds, IMREAD_GRAYSCALE), Card.Suit.DIAMOND);
 
-            final Map<Card.Suit, ReferenceSuit> temp = new ArrayMap<>();
-            for(Map.Entry<Card.Suit, Mat> entry : temp0.entrySet()) {
-                final Mat mat = entry.getValue();
+            final Map<ReferenceSuit, Card.Suit> temp = new ArrayMap<>();
+            for(Map.Entry<Mat, Card.Suit> entry : temp0.entrySet()) {
+                final Mat mat = entry.getKey();
 
                 final Mat thresholded = new Mat();
                 threshold(mat, thresholded, 127, 255, THRESH_BINARY);
@@ -111,7 +113,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
                 final MatOfPoint contour = contours.get(0);
                 final double area = contourArea(contour);
 
-                temp.put(entry.getKey(), new ReferenceSuit(thresholded, contour, area));
+                temp.put(new ReferenceSuit(thresholded, contour, area), entry.getValue());
             }
 
             referenceSuits = Collections.unmodifiableMap(temp);
@@ -185,7 +187,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
             final Mat warped = new Mat();
             warp(grey, warped, candidateContour);
 
-            for(float rotation : new float[] { 315 }) {
+            for(float rotation : new float[] { 135 }) {
                 // Isolate suit
                 final Mat processedCandidate = new Mat();
                 if(!isolateSuit(warped.submat(boundingRect), processedCandidate, rotation))
@@ -194,13 +196,13 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
                 final Mat resized = new Mat();
                 resize(processedCandidate, resized, new Size(SUIT_WIDTH, SUIT_HEIGHT), 0, 0);
                 // Get the per element difference
-                final Mat imgDiff = new Mat();
-                absdiff(resized, referenceSuits.get(Card.Suit.SPADE).mat, imgDiff);
+//                final Mat imgDiff = new Mat();
+//                absdiff(resized, referenceSuits.get(Card.Suit.CLUB).mat, imgDiff);
 
-                test = imgDiff;
+                test = resized;
             }
 
-            if(i == 13)
+            if(i == 6)
                 break;
             i++;
         }
@@ -316,7 +318,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
         final Mat grey = new Mat();
         cvtColor(bgr, grey, COLOR_BGR2GRAY);
 
-        int i = 0;
+        int i = 0, j = 0;
         for(MatOfPoint candidateContour : contours) {
             final Rect boundingRect = boundingRect(candidateContour);
 
@@ -372,10 +374,10 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
                 final double processedArea = contourArea(processedContour);
 
                 // Calculate difference with each actual suit
-                for(Map.Entry<Card.Suit, ReferenceSuit> entry : referenceSuits.entrySet()) {
+                for(Map.Entry<ReferenceSuit, Card.Suit> entry : referenceSuits.entrySet()) {
 
-                    final Card.Suit suit = entry.getKey();
-                    final ReferenceSuit reference = entry.getValue();
+                    final ReferenceSuit reference = entry.getKey();
+                    final Card.Suit suit = entry.getValue();
                     // Get the per element difference
                     final Mat imgDiff = new Mat();
                     absdiff(resized, reference.mat, imgDiff);
@@ -390,7 +392,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
                 }
             }
 
-            matches.sort((o1, o2) -> Double.compare(o1.pxDiff + o1.areaDiff, o2.pxDiff + o2.areaDiff));
+            matches.sort((o1, o2) -> Double.compare(o1.diff, o2.diff));
 
             if(!matches.isEmpty() &&
                     matches.get(0).pxDiff < 1250 &&
@@ -398,10 +400,11 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
 
                 matchedSuits.put(candidateContour, matches.get(0).suit);
 
-                System.out.println(i + " " + matches.get(0));
+                System.out.println(i + " " + j + " " + matches.get(0));
                 System.out.println(i + " close " + matches.get(1));
+                i++;
             }
-            i++;
+            j++;
         }
 
         return matchedSuits;
