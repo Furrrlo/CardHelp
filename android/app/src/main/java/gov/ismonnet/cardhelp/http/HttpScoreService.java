@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
-import gov.ismonnet.cardhelp.Card;
+import gov.ismonnet.cardhelp.core.Card;
 import gov.ismonnet.cardhelp.core.CardsSerializer;
 import gov.ismonnet.cardhelp.core.ScoreService;
 

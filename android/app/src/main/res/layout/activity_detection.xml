@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
-    tools:context=".activity.MainActivity">
+    tools:context=".activity.DetectionActivity">
 
     <ViewFlipper
         android:id="@+id/viewFlipper"

@@ -1,8 +1,8 @@
 package gov.ismonnet.cardhelp.core;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface GamesDeserializer {
 
-    Collection<String> deserialize(String toDeserialize);
+    List<String> deserialize(String toDeserialize) throws SerializationException;
 }

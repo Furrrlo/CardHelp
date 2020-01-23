@@ -1,4 +1,4 @@
-package gov.ismonnet.cardhelp.detection;
+package gov.ismonnet.cardhelp.detector;
 
 import android.content.Context;
 import android.util.Log;
@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
-import gov.ismonnet.cardhelp.activity.ActivityLifeCycle;
+import gov.ismonnet.cardhelp.activity.LifeCycle;
 
 import static android.content.ContentValues.TAG;
 
-public class OpenCvLoader implements ActivityLifeCycle {
+public class OpenCvLoader implements LifeCycle {
 
     private final Context context;
     private final AtomicBoolean loaded = new AtomicBoolean(false);

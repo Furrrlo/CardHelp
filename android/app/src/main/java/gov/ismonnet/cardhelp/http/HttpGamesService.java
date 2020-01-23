@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -22,7 +22,7 @@ class HttpGamesService implements GamesService {
     }
 
     @Override
-    public Collection<String> listGames() {
+    public List<String> listGames() {
         try {
             URL url = new URL("http://cardhelp.altervista.org/games.php");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

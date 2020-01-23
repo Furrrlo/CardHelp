@@ -1,5 +1,18 @@
 <resources>
     <string name="app_name">CardHelp</string>
+
+    <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_computing">ComputingActivity</string>
     <string name="title_activity_main">Main Activity</string>
-    <string name="edited_image_content">edited_image</string>
+
+    <string name="edited_image_content">Immagine processata</string>
+
+    <string name="error_title">Errore</string>
+    <string name="cancel_btn">Annulla</string>
+
+    <string name="no_camera">"Non è stata trovata nessuna applicazione che può scattare una foto"</string>
+
+    <string name="pick_game">Scegli un gioco:</string>
+    <string name="no_game">Nessuno</string>
+    <string name="no_going_back">Non è possibile annullare l\'operazione</string>
 </resources>

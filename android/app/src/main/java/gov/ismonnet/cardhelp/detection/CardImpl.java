@@ -1,13 +1,19 @@
-package gov.ismonnet.cardhelp;
+package gov.ismonnet.cardhelp.detection;
+
+import com.google.auto.factory.AutoFactory;
 
 import java.util.Objects;
 
-public class Card {
+import gov.ismonnet.cardhelp.core.Card;
+import gov.ismonnet.cardhelp.core.CardFactory;
+
+@AutoFactory(implementing = CardFactory.class)
+public class CardImpl implements Card {
 
     private final Suit suit;
     private final int number;
 
-    public Card(Suit suit, int number) {
+    public CardImpl(Suit suit, int number) {
         this.suit = Objects.requireNonNull(suit, "Card suit cannot be null");
         this.number = Objects.requireNonNull(number, "Card number cannot be null");
     }
@@ -23,8 +29,8 @@ public class Card {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Card)) return false;
-        Card card = (Card) o;
+        if (!(o instanceof CardImpl)) return false;
+        CardImpl card = (CardImpl) o;
         return number == card.number &&
                 suit == card.suit;
     }
@@ -36,11 +42,9 @@ public class Card {
 
     @Override
     public String toString() {
-        return "Card{" +
+        return "CardImpl{" +
                 "suit=" + suit +
                 ", number=" + number +
                 '}';
     }
-
-    public enum Suit { DIAMOND, HEART, CLUB, SPADE }
 }

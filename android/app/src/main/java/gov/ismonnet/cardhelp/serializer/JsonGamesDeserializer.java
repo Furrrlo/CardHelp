@@ -4,19 +4,20 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import gov.ismonnet.cardhelp.core.GamesDeserializer;
+import gov.ismonnet.cardhelp.core.SerializationException;
 
 class JsonGamesDeserializer implements GamesDeserializer {
 
     @Inject JsonGamesDeserializer() {}
 
     @Override
-    public Collection<String> deserialize(String toDeserialize) {
-        Collection<String> res = new ArrayList<>();
+    public List<String> deserialize(String toDeserialize) throws SerializationException {
+        List<String> res = new ArrayList<>();
 
         try {
             JSONArray jArray = new JSONArray(toDeserialize);
@@ -26,7 +27,7 @@ class JsonGamesDeserializer implements GamesDeserializer {
                 res.add(jArray.get(i).toString());
 
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            throw new SerializationException(e);
         }
 
         return res;

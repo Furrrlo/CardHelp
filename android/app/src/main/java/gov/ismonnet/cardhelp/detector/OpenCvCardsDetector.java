@@ -1,4 +1,4 @@
-package gov.ismonnet.cardhelp.detection;
+package gov.ismonnet.cardhelp.detector;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,16 +20,19 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
-import gov.ismonnet.cardhelp.Card;
 import gov.ismonnet.cardhelp.R;
-import gov.ismonnet.cardhelp.activity.ActivityLifeCycle;
+import gov.ismonnet.cardhelp.activity.LifeCycle;
+import gov.ismonnet.cardhelp.core.Card;
+import gov.ismonnet.cardhelp.core.CardFactory;
 import gov.ismonnet.cardhelp.core.CardsDetector;
 
 import static org.opencv.core.Core.absdiff;
@@ -38,9 +41,10 @@ import static org.opencv.imgcodecs.Imgcodecs.IMREAD_GRAYSCALE;
 import static org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_MEAN_C;
 import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
 import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.CONTOURS_MATCH_I1;
+import static org.opencv.imgproc.Imgproc.CONTOURS_MATCH_I3;
 import static org.opencv.imgproc.Imgproc.CV_SHAPE_ELLIPSE;
 import static org.opencv.imgproc.Imgproc.CV_SHAPE_RECT;
+import static org.opencv.imgproc.Imgproc.FILLED;
 import static org.opencv.imgproc.Imgproc.FONT_HERSHEY_PLAIN;
 import static org.opencv.imgproc.Imgproc.GaussianBlur;
 import static org.opencv.imgproc.Imgproc.MORPH_CLOSE;
@@ -51,7 +55,6 @@ import static org.opencv.imgproc.Imgproc.adaptiveThreshold;
 import static org.opencv.imgproc.Imgproc.boundingRect;
 import static org.opencv.imgproc.Imgproc.contourArea;
 import static org.opencv.imgproc.Imgproc.cvtColor;
-import static org.opencv.imgproc.Imgproc.dilate;
 import static org.opencv.imgproc.Imgproc.drawContours;
 import static org.opencv.imgproc.Imgproc.findContours;
 import static org.opencv.imgproc.Imgproc.getPerspectiveTransform;
@@ -67,21 +70,25 @@ import static org.opencv.imgproc.Imgproc.threshold;
 import static org.opencv.imgproc.Imgproc.warpAffine;
 import static org.opencv.imgproc.Imgproc.warpPerspective;
 
-class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
+class OpenCvCardsDetector implements CardsDetector, LifeCycle {
 
-    private static final int SUIT_MIN_AREA = 5000;
+    private static final int SUIT_MIN_AREA = 1000;
 
     private static final int SUIT_WIDTH = 70;
     private static final int SUIT_HEIGHT = 100;
 
     private final Context context;
     private final OpenCvLoader loader;
+    private final CardFactory cardFactory;
 
     private Map<ReferenceSuit, Card.Suit> referenceSuits;
 
-    @Inject OpenCvCardsDetector(Context context, OpenCvLoader loader) {
+    @Inject OpenCvCardsDetector(Context context,
+                                OpenCvLoader loader,
+                                CardFactory cardFactory) {
         this.context = context;
         this.loader = loader;
+        this.cardFactory = cardFactory;
     }
 
     @Override
@@ -128,7 +135,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
         private final MatOfPoint contour;
         private final double area;
 
-        public ReferenceSuit(Mat mat, MatOfPoint contour, double area) {
+        ReferenceSuit(Mat mat, MatOfPoint contour, double area) {
             this.mat = mat;
             this.contour = contour;
             this.area = area;
@@ -179,33 +186,33 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
 
         // TODO: temp
 
-        i = 0;
-        Mat test = null;
-        for(MatOfPoint candidateContour : filterSuits(contours, hierarchy)) {
-            final Rect boundingRect = boundingRect(candidateContour);
-
-            final Mat warped = new Mat();
-            warp(grey, warped, candidateContour);
-
-            for(float rotation : new float[] { 135 }) {
-                // Isolate suit
-                final Mat processedCandidate = new Mat();
-                if(!isolateSuit(warped.submat(boundingRect), processedCandidate, rotation))
-                    continue;
-                // Resize to the comparison img dimensions
-                final Mat resized = new Mat();
-                resize(processedCandidate, resized, new Size(SUIT_WIDTH, SUIT_HEIGHT), 0, 0);
-                // Get the per element difference
-//                final Mat imgDiff = new Mat();
-//                absdiff(resized, referenceSuits.get(Card.Suit.CLUB).mat, imgDiff);
-
-                test = resized;
-            }
-
-            if(i == 6)
-                break;
-            i++;
-        }
+//        i = 0;
+//        Mat test = null;
+//        for(MatOfPoint candidateContour : filterSuits(contours, hierarchy)) {
+//            final Rect boundingRect = boundingRect(candidateContour);
+//
+//            final Mat warped = new Mat();
+//            warp(grey, warped, candidateContour);
+//
+//            for(float rotation : new float[] { 135 }) {
+//                // Isolate suit
+//                final Mat processedCandidate = new Mat();
+//                if(!isolateSuit(warped.submat(boundingRect), processedCandidate, rotation))
+//                    continue;
+//                // Resize to the comparison img dimensions
+//                final Mat resized = new Mat();
+//                resize(processedCandidate, resized, new Size(SUIT_WIDTH, SUIT_HEIGHT), 0, 0);
+//                // Get the per element difference
+////                final Mat imgDiff = new Mat();
+////                absdiff(resized, referenceSuits.get(Card.Suit.CLUB).mat, imgDiff);
+//
+//                test = processedCandidate;
+//            }
+//
+//            if(i == 16)
+//                break;
+//            i++;
+//        }
 
         // fine temp
 
@@ -232,7 +239,11 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
                 255,
                 ADAPTIVE_THRESH_MEAN_C,
                 THRESH_BINARY,
-                15, 8);
+                // Use a huge block size, to make sure the suits are fully black and filled
+                // That's because the whole suit basically needs to almost fit in the block size (?)
+                //
+                // C is random as always, but should help clean the pic :D
+                1001, 8);
         // Remove noise v2
         morphologyEx(threshold, output,
                 MORPH_CLOSE,
@@ -241,31 +252,61 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
 
     private List<MatOfPoint> findSuitCandidates(List<MatOfPoint> contours, Mat hierarchy) {
 
-        // Search possible cards in the contours
+        // Sort the contours by size (small -> big), so that when computing whether
+        // a contour is a suit, its child was already computed and it can be
+        // checked whether it was deemed valid or not
 
-        final List<MatOfPoint> suits = new ArrayList<>();
-        for (int i = 0; i < contours.size(); i++) {
+        final List<Integer> sortedContoursIdx = new ArrayList<>();
+
+        for(int i = 0; i < contours.size(); i++)
+            sortedContoursIdx.add(i);
+        Collections.sort(sortedContoursIdx, (i0, i1) -> Double.compare(
+                contourArea(contours.get(i0)),
+                contourArea(contours.get(i1))));
+
+        // Search possible suits in the contours
+
+        final Set<MatOfPoint> suits = new HashSet<>();
+        outer: for(int i : sortedContoursIdx) {
             final MatOfPoint contour = contours.get(i);
-
-            // No child
-
-            // [Next, Previous, First_Child, Parent]
-            final double[] contourInfo = hierarchy.get(0, i);
-            final int firstChild = (int) contourInfo[2];
-
-            if(firstChild != -1)
-                continue;
 
             // Get rid of a bit of noise
 
-            final double area = contourArea(contour);
-            if(area < 100)
+            final double contourArea = contourArea(contour);
+            if(contourArea < 100)
+                continue;
+
+            // No valid child
+
+            // [Next, Previous, First_Child, Parent]
+            final double[] contourInfo = hierarchy.get(0, i);
+
+            int child = (int) contourInfo[2];
+            while(child != -1) {
+                final MatOfPoint childContour = contours.get(child);
+                if(suits.contains(childContour))
+                    continue outer;
+
+                final double[] childInfo = hierarchy.get(0, child);
+                child = (int) childInfo[0];
+            }
+
+            // Get rid of lines (for example card contours) which are not complete
+            // and therefore do not include anything inside the contour itself
+            //
+            // Do so by comparing the size of the contour with the size of the min area rect area
+            // If there's an extreme difference it's one of those
+
+            final MatOfPoint2f contour2f = new MatOfPoint2f();
+            contour.convertTo(contour2f, CvType.CV_32F);
+
+            if(2.5D * contourArea <= minAreaRect(contour2f).size.area())
                 continue;
 
             suits.add(contour);
         }
 
-        return suits;
+        return new ArrayList<>(suits);
     }
 
     private List<MatOfPoint> filterSuits(List<MatOfPoint> contours, Mat hierarchy) {
@@ -300,14 +341,15 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
         drawContours(mask,
                 candidates,
                 -1,
-                new Scalar(255));
-        // Dilate to merge some of the contours
-        final Mat dilated = new Mat();
-        dilate(mask, dilated,
-                getStructuringElement(CV_SHAPE_ELLIPSE, new Size(5, 5)),
-                new Point(-1, -1), // Default, means center of the image
-                3);
-        dilated.copyTo(mask);
+                new Scalar(255), FILLED);
+        // Try merge some of the contours
+        final Mat closed = new Mat();
+        morphologyEx(mask, closed,
+                MORPH_CLOSE,
+                getStructuringElement(CV_SHAPE_ELLIPSE, new Size(2, 2)),
+                new Point(-1, -1), // Default, means kernel center
+                1);
+        closed.copyTo(mask);
     }
 
     private Map<MatOfPoint, Card.Suit> matchSuits(Mat bgr, List<MatOfPoint> contours) {
@@ -367,8 +409,8 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
                 // Get the contour areaDiff
                 final List<MatOfPoint> processedContours = new ArrayList<>();
                 findContours(resized, processedContours, new Mat(), RETR_TREE, CHAIN_APPROX_SIMPLE);
-//                if(processedContours.size() != 1)
-//                    throw new AssertionError("There shouldn't be more or less than 1 contour (" + contours.size() + ')');
+                if(processedContours.isEmpty())
+                    continue;
 
                 final MatOfPoint processedContour = getBiggestContour(processedContours);
                 final double processedArea = contourArea(processedContour);
@@ -386,7 +428,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
                     // Get the area difference
                     final double areaDiff = Math.abs(reference.area - processedArea);
                     // Get the match shapes metric
-                    final double matchShapes = matchShapes(processedContour, reference.contour, CONTOURS_MATCH_I1, 0) * 1000D;
+                    final double matchShapes = matchShapes(processedContour, reference.contour, CONTOURS_MATCH_I3, 0) * 5000D;
 
                     matches.add(new Match(suit, pxDiff, areaDiff, matchShapes, rotation));
                 }
@@ -395,8 +437,8 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
             matches.sort((o1, o2) -> Double.compare(o1.diff, o2.diff));
 
             if(!matches.isEmpty() &&
-                    matches.get(0).pxDiff < 1250 &&
-                    matches.get(0).diff < 2000) {
+                    matches.get(0).pxDiff < 1400 &&
+                    matches.get(0).diff < 3000) {
 
                 matchedSuits.put(candidateContour, matches.get(0).suit);
 
@@ -434,9 +476,9 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
         findContours(rotated, contours, new Mat(), RETR_TREE, CHAIN_APPROX_SIMPLE);
         if(contours.isEmpty())
             return false;
-        // TODO: should return all and check each one of them
         final MatOfPoint suitContour = getBiggestContour(contours);
         // Isolate it
+        @SuppressWarnings("ConstantConditions")
         final Mat suit0 = rotated.submat(boundingRect(suitContour));
         suit0.copyTo(suit);
 
@@ -444,9 +486,6 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
     }
 
     private MatOfPoint getBiggestContour(List<MatOfPoint> contours) {
-        if(contours.isEmpty())
-            return null;
-
         MatOfPoint biggest = contours.get(0);
         for(int k = 1; k < contours.size(); k++)
             if(contourArea(contours.get(k)) > contourArea(biggest))
@@ -455,6 +494,7 @@ class OpenCvCardsDetector implements CardsDetector, ActivityLifeCycle {
     }
 
     private void warp(Mat toWarp, Mat warped, MatOfPoint contour) {
+        // FIXME: Just straight up not make sense
 
         final MatOfPoint2f contour2f = new MatOfPoint2f();
         contour.convertTo(contour2f, CvType.CV_32F);

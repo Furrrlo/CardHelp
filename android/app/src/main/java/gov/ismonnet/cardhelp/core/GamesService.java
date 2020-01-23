@@ -1,8 +1,8 @@
 package gov.ismonnet.cardhelp.core;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface GamesService {
 
-    Collection<String> listGames();
+    List<String> listGames();
 }

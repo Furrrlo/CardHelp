@@ -8,15 +8,16 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
-import gov.ismonnet.cardhelp.Card;
+import gov.ismonnet.cardhelp.core.Card;
 import gov.ismonnet.cardhelp.core.CardsSerializer;
+import gov.ismonnet.cardhelp.core.SerializationException;
 
 class JsonCardsSerializer implements CardsSerializer {
 
     @Inject JsonCardsSerializer() {}
 
     @Override
-    public String serialize(String game, Collection<Card> cards) {
+    public String serialize(String game, Collection<Card> cards) throws SerializationException {
         JSONObject jRes = new JSONObject();
         JSONObject jTemp = new JSONObject();
 
@@ -26,29 +27,24 @@ class JsonCardsSerializer implements CardsSerializer {
             //put game in JSON result
             jRes.put("game", game);
 
-            cards.forEach(card -> {
-                try {
-                    //create new card object
-                    jTemp.put("number", card.getNumber());
-                    jTemp.put("suit", card.getSuit().name().toLowerCase());
+            for (Card card : cards) {
+                //create new card object
+                jTemp.put("number", card.getNumber());
+                jTemp.put("suit", card.getSuit().name().toLowerCase());
 
-                    //put card to array
-                    jCards.put(new JSONObject(jTemp.toString()));
-                    //remove existing card object
+                //put card to array
+                jCards.put(new JSONObject(jTemp.toString()));
+                //remove existing card object
 
-                    jTemp.remove("suit");
-                    jTemp.remove("number");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } );
+                jTemp.remove("suit");
+                jTemp.remove("number");
+            }
 
             //put vector into result
             jRes.put("cards", jCards);
 
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            throw new SerializationException(e);
         }
 
         return jRes.toString();

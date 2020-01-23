@@ -6,20 +6,20 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import gov.ismonnet.cardhelp.Card;
+import gov.ismonnet.cardhelp.core.Card;
+import gov.ismonnet.cardhelp.detection.CardImpl;
 
 public class JsonCardsSerializerTest {
-
-
+    
     @Test
     public void serialize() {
         final String game = "test_game";
         final List<Card> cards = new ArrayList<>();
 
-        cards.add(new Card(Card.Suit.CLUB, 4));
-        cards.add(new Card(Card.Suit.HEART, 3));
-        cards.add(new Card(Card.Suit.DIAMOND, 12));
-        cards.add(new Card(Card.Suit.SPADE,5));
+        cards.add(new CardImpl(CardImpl.Suit.CLUB, 4));
+        cards.add(new CardImpl(CardImpl.Suit.HEART, 3));
+        cards.add(new CardImpl(CardImpl.Suit.DIAMOND, 12));
+        cards.add(new CardImpl(CardImpl.Suit.SPADE,5));
 
         Assert.assertEquals(
                 "{\"game\":\"" + game + "\"," +

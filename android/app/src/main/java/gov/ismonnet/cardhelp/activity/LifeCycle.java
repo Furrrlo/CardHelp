@@ -1,6 +1,6 @@
 package gov.ismonnet.cardhelp.activity;
 
-public interface ActivityLifeCycle {
+public interface LifeCycle {
 
     default void onCreate() {
     }

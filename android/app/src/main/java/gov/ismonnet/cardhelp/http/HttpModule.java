@@ -1,20 +1,21 @@
 package gov.ismonnet.cardhelp.http;
 
+import javax.inject.Singleton;
+
 import dagger.Binds;
 import dagger.Module;
-import gov.ismonnet.cardhelp.activity.ActivityScope;
 import gov.ismonnet.cardhelp.core.GamesService;
 import gov.ismonnet.cardhelp.core.ScoreService;
-import gov.ismonnet.cardhelp.serializer.JsonSerializationModule;
+import gov.ismonnet.cardhelp.serializer.SerializationModule;
 
-@Module(includes = JsonSerializationModule.class)
+@Module(includes = SerializationModule.class)
 public abstract class HttpModule {
 
     @Binds
-    @ActivityScope
+    @Singleton
     abstract GamesService gamesService(HttpGamesService httpGamesService);
 
     @Binds
-    @ActivityScope
+    @Singleton
     abstract ScoreService scoreService(HttpScoreService httpScoreService);
 }
